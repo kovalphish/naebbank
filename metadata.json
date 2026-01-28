@@ -1,0 +1,7 @@
+{
+  "name": "NAEB Банк - iOS 26 Edition",
+  "description": "Гипер-футуристичный банковский опыт с российским контекстом, авторизацией по номеру и поддержкой Gemini AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
