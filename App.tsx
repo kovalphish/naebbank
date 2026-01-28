@@ -31,6 +31,30 @@ const LoadingOverlay: React.FC<{ message: string }> = ({ message }) => (
   </div>
 );
 
+const SBPLogo = () => (
+  <div className="flex items-center gap-3 scale-110">
+    <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 15L85 35V65L50 85L15 65V35L50 15Z" stroke="#121131" strokeWidth="1" opacity="0.1" />
+      {/* Top Triangle - Yellow/Orange */}
+      <path d="M50 50L80 32L50 15V50Z" fill="#FBBF24" />
+      <path d="M50 50L80 32L65 50H50Z" fill="#F59E0B" />
+      {/* Right Triangle - Red/Orange */}
+      <path d="M50 50L80 32V68L50 50Z" fill="#EF4444" opacity="0.8" />
+      <path d="M50 50L80 68L65 50H50Z" fill="#DC2626" />
+      {/* Bottom Triangle - Green */}
+      <path d="M50 50L80 68L50 85V50Z" fill="#10B981" />
+      <path d="M50 50L35 50L50 85V50Z" fill="#059669" />
+      {/* Left Triangle - Blue/Purple */}
+      <path d="M50 50L20 68L20 32L50 50Z" fill="#6366F1" />
+      <path d="M50 50L20 32L35 50H50Z" fill="#4F46E5" />
+      <path d="M50 50L20 68L35 50H50Z" fill="#4338CA" />
+    </svg>
+    <div className="flex flex-col -space-y-1">
+      <span className="text-[#121131] text-3xl font-black italic tracking-tighter">сбп</span>
+    </div>
+  </div>
+);
+
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -43,11 +67,6 @@ const App: React.FC = () => {
   const [fio, setFio] = useState('');
   const [error, setError] = useState('');
   const [promoInput, setPromoInput] = useState('');
-
-  const [transferType, setTransferType] = useState<'phone' | 'card'>('phone');
-  const [recipient, setRecipient] = useState('');
-  const [transferAmount, setTransferAmount] = useState('');
-  const [selectedBank, setSelectedBank] = useState(RUSSIAN_BANKS[0]);
 
   const [islandMode, setIslandMode] = useState<'normal' | 'expanded'>('normal');
   const [assistantResponse, setAssistantResponse] = useState<string | null>(null);
@@ -102,7 +121,7 @@ const App: React.FC = () => {
       users.push(updatedUser);
     }
     localStorage.setItem('naeb_users', JSON.stringify(users));
-    setCurrentUser({ ...updatedUser }); // Use spread to ensure reference change triggers re-render
+    setCurrentUser({ ...updatedUser });
   };
 
   const handleAuth = (e: React.FormEvent) => {
@@ -200,20 +219,6 @@ const App: React.FC = () => {
     }, 2500);
   };
 
-  const askAssistant = async () => {
-    if (!query) return;
-    setIsAssistantLoading(true);
-    setAssistantResponse("Анализирую ваши квантовые потоки...");
-    
-    // Artificial delay to make it feel more thorough
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const res = await getFinancialAdvice(query, currentUser?.balance || 0);
-    setAssistantResponse(res || "Ошибка резонанса.");
-    setIsAssistantLoading(false);
-    setQuery('');
-  };
-
   if (!isAuthenticated) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-[#050505] p-8 relative overflow-hidden">
@@ -309,7 +314,18 @@ const App: React.FC = () => {
               <h1 className="text-6xl font-black tracking-tighter mb-8 tabular-nums text-white">{(currentUser?.balance || 0).toLocaleString('ru-RU')} <span className="text-3xl font-bold opacity-50 text-white">₽</span></h1>
               <div className="flex gap-4 items-center">
                 <button onClick={() => setActiveScreen('transfer')} className="flex-1 bg-white text-black py-4 rounded-[1.5rem] font-black text-sm active:scale-95 transition-all shadow-xl">Перевод</button>
-                <button onClick={() => setActiveScreen('profile')} className="flex-1 glass-card text-white py-4 rounded-[1.5rem] font-black text-sm border-white/20 active:scale-95 transition-all">Пополнение</button>
+                <div className="flex-1 glass-card p-1 rounded-[1.5rem] border-white/10 flex gap-2">
+                   <input 
+                     type="text" 
+                     placeholder="ПРОМО" 
+                     value={promoInput} 
+                     onChange={(e) => setPromoInput(e.target.value)}
+                     className="w-full bg-transparent border-none outline-none pl-4 text-xs font-black uppercase tracking-widest placeholder:text-zinc-600"
+                   />
+                   <button onClick={handlePromo} className="bg-white text-black w-10 h-10 rounded-xl flex items-center justify-center active:scale-90 transition-all">
+                      <Gift size={18} />
+                   </button>
+                </div>
                 <button onClick={() => setActiveScreen('qr')} className="w-14 h-14 glass-card rounded-full flex items-center justify-center border-white/20 active:scale-90 transition-all shadow-lg glass-shine">
                   <QrCode size={24} className="text-blue-400" />
                 </button>
@@ -351,13 +367,11 @@ const App: React.FC = () => {
         {activeScreen === 'qr' && (
           <div className="fixed inset-0 z-[100] bg-black flex flex-col text-white animate-in zoom-in-95 duration-300">
              <video ref={videoRef} autoPlay playsInline className="absolute inset-0 w-full h-full object-cover opacity-70" />
-             
              <div className="absolute top-10 right-8 z-[110]">
                 <button onClick={() => setActiveScreen('home')} className="w-12 h-12 rounded-full glass-card flex items-center justify-center border-white/20 active:scale-90 transition-transform">
                    <X size={28} />
                 </button>
              </div>
-
              <div className="flex-1 flex items-center justify-center relative pointer-events-none">
                 <div className="w-64 h-64 border-2 border-white/20 rounded-3xl relative">
                   <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white/60 rounded-tl-xl" />
@@ -367,7 +381,6 @@ const App: React.FC = () => {
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/40 animate-[scan_3s_infinite_linear] blur-[1px]" />
                 </div>
              </div>
-
              <div className="absolute bottom-20 left-0 right-0 flex justify-center">
                 <button 
                   onClick={() => setActiveScreen('payment')}
@@ -389,20 +402,7 @@ const App: React.FC = () => {
 
              <div className="flex-1 flex flex-col items-center justify-center px-8 space-y-12 pb-10">
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="w-20 h-20 flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                       <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" fill="none" stroke="#121131" strokeWidth="2" />
-                       <circle cx="50" cy="50" r="40" stroke="url(#sbp-grad)" strokeWidth="8" fill="none" />
-                       <text x="50" y="55" textAnchor="middle" fill="#121131" fontSize="18" fontWeight="900" fontFamily="Inter">сбп</text>
-                       <defs>
-                          <linearGradient id="sbp-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                             <stop offset="0%" stopColor="#41a23b" />
-                             <stop offset="50%" stopColor="#e22e2e" />
-                             <stop offset="100%" stopColor="#2c51b9" />
-                          </linearGradient>
-                       </defs>
-                    </svg>
-                  </div>
+                  <SBPLogo />
                   <h3 className="text-[#121131] text-lg font-bold">Автобус №22</h3>
                 </div>
 
@@ -430,7 +430,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
           <div className="w-full max-w-lg glass-card rounded-t-[3.5rem] p-8 pb-12 text-white animate-in slide-in-from-bottom-full duration-500 border-white/20 shadow-2xl">
             <div className="flex justify-between items-start mb-10">
-               <div className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">{selectedTx.date}</div>
+               <div className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">{selectedTx.date}</div>
                <button onClick={() => setSelectedTx(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center active:scale-90 transition-transform">
                   <X size={20} />
                </button>
@@ -466,7 +466,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Full Screen Receipt Modal - Match Screenshot */}
+      {/* Full Screen Receipt Modal */}
       {showReceipt && (
         <div className="fixed inset-0 z-[300] bg-white animate-in fade-in duration-300 flex flex-col font-sans select-text">
             <header className="px-8 pt-10 pb-4 flex justify-end">
@@ -476,33 +476,27 @@ const App: React.FC = () => {
             </header>
 
             <main className="flex-1 overflow-y-auto px-8 py-2 text-zinc-900">
-                {/* Date and Header */}
                 <div className="mb-8">
                     <div className="text-zinc-400 text-sm font-medium mb-4">{selectedTx?.date || '28.01.2026 07:47:05'}</div>
                     <div className="flex justify-between items-baseline">
                         <h1 className="text-[40px] font-bold tracking-tight">Итого</h1>
                         <span className="text-[40px] font-bold tracking-tight">{Math.abs(selectedTx?.amount || 44)} ₽</span>
                     </div>
-                    {/* Yellow Separator */}
                     <div className="w-full h-[2px] bg-[#fcd34d] mt-4"></div>
                 </div>
 
-                {/* Info Rows */}
                 <div className="space-y-4 mb-10">
                     <SimpleReceiptRow label="Покупка" value="По QR-коду" />
                     <SimpleReceiptRow label="Статус" value="Успешно" />
                     <SimpleReceiptRow label="Сумма" value={`${Math.abs(selectedTx?.amount || 44)} ₽`} />
                     <SimpleReceiptRow label="Магазин" value="Оплата проезда на bilet.nspk.ru" />
-                    
                     <div className="pt-2" />
-                    
                     <SimpleReceiptRow label="Счет списания" value="408178106000****2504" />
                     <SimpleReceiptRow label="Наименование ЮЛ или ИП" value="ООО «БЕНТОК-СМОЛЕНСК»" />
                     <SimpleReceiptRow label="Идентификатор операции" value="A53221215425581F00000100116" isLong />
                     <SimpleReceiptRow label="СБП" value="30701" />
                 </div>
 
-                {/* Bank Stamp / Seal */}
                 <div className="relative mt-12 mb-16 flex justify-center">
                     <div className="border-[2px] border-[#3b82f6] px-10 py-6 text-[#3b82f6] font-bold text-center relative max-w-sm rounded-sm">
                         <div className="text-xs font-black mb-1">АО «ТБАНК»</div>
@@ -511,8 +505,6 @@ const App: React.FC = () => {
                             К/С 30101810145250000974
                         </div>
                         <div className="text-[10px] font-black mt-1">ШАДРИНА Е. С.</div>
-                        
-                        {/* The Handwritten Signature SVG Overlay */}
                         <svg className="absolute top-1/2 left-[-20px] w-[140%] h-[120%] -translate-y-1/2 pointer-events-none opacity-80" viewBox="0 0 200 100">
                              <path d="M40,60 C60,40 100,80 140,50 C160,30 180,60 190,45" fill="none" stroke="#2563eb" strokeWidth="2.5" strokeLinecap="round" />
                              <path d="M50,70 C70,50 110,90 150,60 C170,40 190,70 200,55" fill="none" stroke="#2563eb" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
@@ -520,10 +512,8 @@ const App: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Footer Separator */}
                 <div className="w-full h-[2px] bg-[#fcd34d] mb-4"></div>
 
-                {/* Footer Text */}
                 <div className="text-zinc-400 text-xs font-medium space-y-1 pb-10">
                     <p>Квитанция № 1-111-184-502-464</p>
                     <p>По вопросам зачисления обращайтесь к получателю</p>
@@ -538,7 +528,6 @@ const App: React.FC = () => {
           <div className="ios-blur border border-white/15 rounded-full p-2 flex items-center justify-between shadow-2xl glass-shine">
             <NavButton active={activeScreen === 'home'} onClick={() => setActiveScreen('home')} icon={<Home size={22} />} />
             <NavButton active={activeScreen === 'cards'} onClick={() => setActiveScreen('cards')} icon={<CreditCard size={22} />} />
-            {/* Fix: cast activeScreen to any to bypass narrowing error since 'qr' is logically excluded from the wrapper but still valid as a target. */}
             <NavButton active={(activeScreen as any) === 'qr'} onClick={() => setActiveScreen('qr')} icon={<Plus size={22} />} />
             <NavButton active={activeScreen === 'assistant'} onClick={() => setActiveScreen('assistant')} icon={<Sparkles size={22} />} />
             <NavButton active={activeScreen === 'profile'} onClick={() => setActiveScreen('profile')} icon={<User size={22} />} />
@@ -555,7 +544,6 @@ const App: React.FC = () => {
 
 const NavButton: React.FC<{active: boolean, onClick: () => void, icon: React.ReactNode}> = ({ active, onClick, icon }) => (
   <button onClick={onClick} className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${active ? 'text-white bg-white/10 border border-white/10 shadow-inner' : 'text-zinc-600 hover:text-white'}`}>
-    {/* Fix: cast icon to React.ReactElement<any> to allow additional props like strokeWidth to be cloned safely. */}
     {React.cloneElement(icon as React.ReactElement<any>, { strokeWidth: active ? 2.5 : 2 })}
   </button>
 );
