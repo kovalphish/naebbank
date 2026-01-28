@@ -20,7 +20,7 @@ const LiquidBackground = () => (
 );
 
 const LoadingOverlay: React.FC<{ message: string }> = ({ message }) => (
-  <div className="fixed inset-0 z-[500] bg-black/60 backdrop-blur-xl flex flex-col items-center justify-center animate-in fade-in duration-300">
+  <div className="fixed inset-0 z-[500] bg-black/60 backdrop-blur-xl flex flex-col items-center justify-center animate-fade-in">
     <div className="relative">
       <div className="w-20 h-20 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-[0_0_20px_rgba(59,130,246,0.3)]" />
       <div className="absolute inset-0 flex items-center justify-center">
@@ -35,16 +35,12 @@ const SBPLogo = () => (
   <div className="flex items-center gap-3 scale-110">
     <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M50 15L85 35V65L50 85L15 65V35L50 15Z" stroke="#121131" strokeWidth="1" opacity="0.1" />
-      {/* Top Triangle - Yellow/Orange */}
       <path d="M50 50L80 32L50 15V50Z" fill="#FBBF24" />
       <path d="M50 50L80 32L65 50H50Z" fill="#F59E0B" />
-      {/* Right Triangle - Red/Orange */}
       <path d="M50 50L80 32V68L50 50Z" fill="#EF4444" opacity="0.8" />
       <path d="M50 50L80 68L65 50H50Z" fill="#DC2626" />
-      {/* Bottom Triangle - Green */}
       <path d="M50 50L80 68L50 85V50Z" fill="#10B981" />
       <path d="M50 50L35 50L50 85V50Z" fill="#059669" />
-      {/* Left Triangle - Blue/Purple */}
       <path d="M50 50L20 68L20 32L50 50Z" fill="#6366F1" />
       <path d="M50 50L20 32L35 50H50Z" fill="#4F46E5" />
       <path d="M50 50L20 68L35 50H50Z" fill="#4338CA" />
@@ -221,9 +217,9 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#050505] p-8 relative overflow-hidden">
+      <div className="h-[100dvh] w-full flex flex-col items-center justify-center bg-[#050505] p-8 relative overflow-hidden">
         <LiquidBackground />
-        <div className="z-10 text-center space-y-6 max-w-sm w-full animate-in fade-in zoom-in-95 duration-700">
+        <div className="z-10 text-center space-y-6 max-w-sm w-full animate-fade-in">
           <div className="flex flex-col items-center gap-4">
              <div className="w-24 h-24 glass-card rounded-[2.5rem] flex items-center justify-center shadow-2xl relative pulse-effect glass-shine">
                 <Shield size={44} className="text-white fill-white/10" />
@@ -232,8 +228,8 @@ const App: React.FC = () => {
              <p className="text-blue-400 font-bold tracking-[0.3em] text-[10px] uppercase opacity-80">Liquid Quantum Bank</p>
           </div>
           <div className="glass-card p-8 rounded-[3rem] space-y-6 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] glass-shine">
-            <h2 className="text-2xl font-bold tracking-tight">{authMode === 'login' ? 'Авторизация' : 'Создание аккаунта'}</h2>
-            <form onSubmit={handleAuth} className="space-y-4">
+            <h2 className="text-2xl font-bold tracking-tight text-white">{authMode === 'login' ? 'Авторизация' : 'Создание аккаунта'}</h2>
+            <form onSubmit={handleAuth} className="space-y-4 text-left">
               {authMode === 'register' && (
                 <div className="relative group">
                   <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-blue-400 transition-colors" size={20} />
@@ -263,7 +259,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="h-screen w-full bg-[#050505] flex flex-col items-center relative select-none">
+    <div className="h-[100dvh] w-full bg-[#050505] flex flex-col items-center relative select-none">
       {activeScreen !== 'payment' && <LiquidBackground />}
       
       {globalLoading.active && <LoadingOverlay message={globalLoading.message} />}
@@ -296,7 +292,7 @@ const App: React.FC = () => {
 
       <main className={`flex-1 w-full max-w-lg overflow-y-auto no-scrollbar z-10 relative ${activeScreen === 'payment' ? 'bg-[#f4f4f4] pt-0' : 'px-6 pt-24 pb-32'}`}>
         {activeScreen === 'home' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="space-y-8 animate-fade-in">
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-4xl font-black tracking-tighter drop-shadow-lg text-white">Хай, {currentUser?.fio?.split(' ')[0]}</h2>
@@ -312,15 +308,15 @@ const App: React.FC = () => {
               </div>
               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-2">Общий Баланс</p>
               <h1 className="text-6xl font-black tracking-tighter mb-8 tabular-nums text-white">{(currentUser?.balance || 0).toLocaleString('ru-RU')} <span className="text-3xl font-bold opacity-50 text-white">₽</span></h1>
-              <div className="flex gap-4 items-center">
-                <button onClick={() => setActiveScreen('transfer')} className="flex-1 bg-white text-black py-4 rounded-[1.5rem] font-black text-sm active:scale-95 transition-all shadow-xl">Перевод</button>
-                <div className="flex-1 glass-card p-1 rounded-[1.5rem] border-white/10 flex gap-2">
+              <div className="flex gap-4 items-center flex-wrap">
+                <button onClick={() => setActiveScreen('transfer')} className="flex-1 min-w-[120px] bg-white text-black py-4 rounded-[1.5rem] font-black text-sm active:scale-95 transition-all shadow-xl">Перевод</button>
+                <div className="flex-1 min-w-[120px] glass-card p-1 rounded-[1.5rem] border-white/10 flex gap-2">
                    <input 
                      type="text" 
                      placeholder="ПРОМО" 
                      value={promoInput} 
                      onChange={(e) => setPromoInput(e.target.value)}
-                     className="w-full bg-transparent border-none outline-none pl-4 text-xs font-black uppercase tracking-widest placeholder:text-zinc-600"
+                     className="w-full bg-transparent border-none outline-none pl-4 text-xs font-black uppercase tracking-widest placeholder:text-zinc-600 text-white"
                    />
                    <button onClick={handlePromo} className="bg-white text-black w-10 h-10 rounded-xl flex items-center justify-center active:scale-90 transition-all">
                       <Gift size={18} />
@@ -348,12 +344,12 @@ const App: React.FC = () => {
                         <div className={`w-14 h-14 rounded-2xl glass-card flex items-center justify-center border-white/10 group-hover:scale-110 transition-transform shadow-inner`}>
                            {tx.amount > 0 ? <ArrowDownLeft className="text-green-400" size={24} /> : <Bus className="text-blue-400" size={24} />}
                         </div>
-                        <div>
-                          <h4 className="font-black text-sm text-white line-clamp-1 max-w-[150px]">{tx.title}</h4>
+                        <div className="overflow-hidden">
+                          <h4 className="font-black text-sm text-white truncate max-w-[150px]">{tx.title}</h4>
                           <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{tx.date.split(',')[0]}</p>
                         </div>
                       </div>
-                      <p className={`text-lg font-black tabular-nums ${tx.amount > 0 ? 'text-green-400' : 'text-white'}`}>
+                      <p className={`text-lg font-black tabular-nums whitespace-nowrap ${tx.amount > 0 ? 'text-green-400' : 'text-white'}`}>
                         {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString('ru-RU')} ₽
                       </p>
                     </div>
@@ -365,7 +361,7 @@ const App: React.FC = () => {
         )}
 
         {activeScreen === 'qr' && (
-          <div className="fixed inset-0 z-[100] bg-black flex flex-col text-white animate-in zoom-in-95 duration-300">
+          <div className="fixed inset-0 z-[100] bg-black flex flex-col text-white animate-fade-in">
              <video ref={videoRef} autoPlay playsInline className="absolute inset-0 w-full h-full object-cover opacity-70" />
              <div className="absolute top-10 right-8 z-[110]">
                 <button onClick={() => setActiveScreen('home')} className="w-12 h-12 rounded-full glass-card flex items-center justify-center border-white/20 active:scale-90 transition-transform">
@@ -395,7 +391,7 @@ const App: React.FC = () => {
         )}
 
         {activeScreen === 'payment' && (
-          <div className="h-full w-full bg-[#f4f4f4] flex flex-col animate-in fade-in duration-500">
+          <div className="h-full w-full bg-[#f4f4f4] flex flex-col animate-fade-in">
              <header className="bg-[#121131] py-4 text-center">
                 <h2 className="text-white text-sm font-semibold tracking-tight">Оплата проезда</h2>
              </header>
@@ -425,12 +421,11 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Detail Tx Modal */}
       {selectedTx && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="w-full max-w-lg glass-card rounded-t-[3.5rem] p-8 pb-12 text-white animate-in slide-in-from-bottom-full duration-500 border-white/20 shadow-2xl">
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg glass-card rounded-t-[3.5rem] p-8 pb-12 text-white border-white/20 shadow-2xl">
             <div className="flex justify-between items-start mb-10">
-               <div className="text-sm font-black uppercase tracking-[0.3em] text-zinc-400">{selectedTx.date}</div>
+               <div className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">{selectedTx.date}</div>
                <button onClick={() => setSelectedTx(null)} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center active:scale-90 transition-transform">
                   <X size={20} />
                </button>
@@ -466,16 +461,15 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Full Screen Receipt Modal */}
       {showReceipt && (
-        <div className="fixed inset-0 z-[300] bg-white animate-in fade-in duration-300 flex flex-col font-sans select-text">
+        <div className="fixed inset-0 z-[300] bg-white animate-fade-in flex flex-col font-sans select-text overflow-y-auto">
             <header className="px-8 pt-10 pb-4 flex justify-end">
                 <button onClick={() => setShowReceipt(false)} className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center active:scale-90 transition-transform">
                     <X size={28} className="text-zinc-900" />
                 </button>
             </header>
 
-            <main className="flex-1 overflow-y-auto px-8 py-2 text-zinc-900">
+            <main className="flex-1 px-8 py-2 text-zinc-900">
                 <div className="mb-8">
                     <div className="text-zinc-400 text-sm font-medium mb-4">{selectedTx?.date || '28.01.2026 07:47:05'}</div>
                     <div className="flex justify-between items-baseline">
@@ -514,7 +508,7 @@ const App: React.FC = () => {
 
                 <div className="w-full h-[2px] bg-[#fcd34d] mb-4"></div>
 
-                <div className="text-zinc-400 text-xs font-medium space-y-1 pb-10">
+                <div className="text-zinc-400 text-xs font-medium space-y-1 pb-10 text-center">
                     <p>Квитанция № 1-111-184-502-464</p>
                     <p>По вопросам зачисления обращайтесь к получателю</p>
                     <p>Служба поддержки <span className="text-blue-500">fb@tbank.ru</span></p>
